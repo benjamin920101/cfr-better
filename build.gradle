@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id "dev.fastmc.maven-repo" version "1.0.0"
 }
 
 version = '0.3-SNAPSHOT'
@@ -33,7 +32,7 @@ dependencies {
 jar {
     manifest {
         attributes 'Main-Class': 'org.benf.cfr.reader.Main'
-		attributes 'Implementation-Version': archiveVersion
+        attributes 'Implementation-Version': archiveVersion
     }
 }
 
