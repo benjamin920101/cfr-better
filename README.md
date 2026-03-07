@@ -121,3 +121,11 @@ When adding a lot of new classes or JAR files for the decompilation tests or whe
 Generates all missing expected test data based on the current CFR output.
 - `cfr.decompilation-test.update-expected`  
 Updates the expected test data to match the actual data produced by CFR. Note that this does not work for expected Java output using [decompilation notes](#decompilation-note-comments) because those comments would get lost. The affected tests have to be updated manually.
+
+# 下載 fastutil                                                                            >> Invoke-WebRequest -Uri "https://repo1.maven.org/maven2/it/unimi/dsi/fastutil/8.5.6/fastutil-8.5.6.jar" -OutFile "fastutil-8.5.6.jar" -UseBasicParsing
+>>
+>> # 改名以移除空白（如果原名含空白）
+>> Rename-Item "musheor-1.3 1.21.11.jar" "musheor-1.3-1.21.11.jar"
+>>
+>> # 執行 CFR（以 cfr-0.3-SNAPSHOT.jar 與 fastutil-8.5.6.jar 為 classpath）
+>> java -cp ".\cfr-0.3-SNAPSHOT.jar;.\fastutil-8.5.6.jar" org.benf.cfr.reader.Main ".\musheor-1.3-1.21.11.jar" --outputdir ".\musheor-1.3-1.21.11"
