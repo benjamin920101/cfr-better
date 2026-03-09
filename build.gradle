@@ -14,37 +14,30 @@ repositories {
 }
 
 dependencies {
+    // 將現成的 cfr binary 加入，並把 fastutil 加入依賴
+    implementation files('libs/cfr-0.3-SNAPSHOT.jar')
     implementation 'it.unimi.dsi:fastutil:8.5.6'
-    // 如果還有其他依賴，請保留或合併
 }
 
 application {
-    // Gradle 7+:
+    // Gradle 7+ 的寫法
     mainClass = 'org.benf.cfr.reader.Main'
-    // 若你使用舊版 Gradle (<7)，改為:
-    // mainClassName = 'org.benf.cfr.reader.Main'
 }
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-jar {
-    manifest {
-        attributes(
-            'Main-Class': 'org.benf.cfr.reader.Main'
-        )
-    }
-}
-
 shadowJar {
+    // 產出為 build/libs/cfr-with-fastutil-0.3-SNAPSHOT.jar
     archiveBaseName.set('cfr-with-fastutil')
     archiveVersion.set(version)
-    archiveClassifier.set('') // 取消 classifier，使檔名像 cfr-with-fastutil-0.3-SNAPSHOT.jar
+    archiveClassifier.set('') // 取消 classifier，產生較簡潔檔名
     manifest {
         attributes('Main-Class': 'org.benf.cfr.reader.Main')
     }
-
-    // 如遇類衝突可以使用 relocate 或 exclude，例如：
-    // relocate 'it.unimi.dsi.fastutil', 'org.benf.shaded.fastutil'
+    // 合併 service 檔與其他重複資源
+    mergeServiceFiles()
+    // 如有必要，可把 runtime classpath 的 jar 解開到最終 jar（通常 Shadow 已會處理）
+    // from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
