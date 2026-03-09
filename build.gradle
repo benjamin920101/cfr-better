@@ -24,13 +24,10 @@ java {
 
 repositories {
     mavenCentral()
-    flatDir {
-        dirs 'lib'
-    }
 }
 
 dependencies {
-    implementation: 'it.unimi.dsi:fastutil:8.5.11'
+    implementation 'it.unimi.dsi:fastutil:8.5.11'
 }
 
 jar {
