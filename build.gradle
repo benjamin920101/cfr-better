@@ -24,11 +24,14 @@ java {
 
 repositories {
     mavenCentral()
+    flatDir {
+        dirs 'lib'
+    }
 }
 
 dependencies {
-    modImplementation 'it.unimi.dsi:fastutil:8.5.11'
-    include name: 'it.unimi.dsi:fastutil:8.5.11'
+    modImplementation files('lib/it.unimi.dsi:fastutil:8.5.6.jar')
+    include name: 'it.unimi.dsi:fastutil:8.5.6'
 }
 
 jar {
