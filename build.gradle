@@ -30,8 +30,7 @@ repositories {
 }
 
 dependencies {
-    modImplementation files('lib/it.unimi.dsi:fastutil:8.5.6.jar')
-    include name: 'it.unimi.dsi:fastutil:8.5.6'
+    implementation: 'it.unimi.dsi:fastutil:8.5.11'
 }
 
 jar {
