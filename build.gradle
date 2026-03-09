@@ -1,26 +1,13 @@
 plugins {
     id 'java'
-    id 'maven-publish'
-    id "dev.fastmc.maven-repo" version "1.0.0"
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
+group = 'org.benf'
 version = '0.3-SNAPSHOT'
-
-group = 'net.fabricmc'
-archivesBaseName = 'cfr'
-
-sourceSets {
-    main {
-        java.srcDirs = ['src', 'src-templates']
-    }
-}
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
-    withSourcesJar()
-}
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
 
 repositories {
     mavenCentral()
@@ -28,32 +15,36 @@ repositories {
 
 dependencies {
     implementation 'it.unimi.dsi:fastutil:8.5.6'
+    // 如果還有其他依賴，請保留或合併
+}
+
+application {
+    // Gradle 7+:
+    mainClass = 'org.benf.cfr.reader.Main'
+    // 若你使用舊版 Gradle (<7)，改為:
+    // mainClassName = 'org.benf.cfr.reader.Main'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
 
 jar {
     manifest {
-        attributes 'Main-Class': 'org.benf.cfr.reader.Main'
+        attributes(
+            'Main-Class': 'org.benf.cfr.reader.Main'
+        )
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
+shadowJar {
+    archiveBaseName.set('cfr-with-fastutil')
+    archiveVersion.set(version)
+    archiveClassifier.set('') // 取消 classifier，使檔名像 cfr-with-fastutil-0.3-SNAPSHOT.jar
+    manifest {
+        attributes('Main-Class': 'org.benf.cfr.reader.Main')
     }
-}
 
-// A task to ensure that the version being released has not already been released.
-task checkVersion {
-    doFirst {
-        def xml = new URL("https://maven.fabricmc.net/net/fabricmc/cfr/maven-metadata.xml").text
-        def metadata = new XmlSlurper().parseText(xml)
-        def versions = metadata.versioning.versions.version*.text();
-        if (versions.contains(version)) {
-            throw new RuntimeException("${version} has already been released!")
-        }
-    }
+    // 如遇類衝突可以使用 relocate 或 exclude，例如：
+    // relocate 'it.unimi.dsi.fastutil', 'org.benf.shaded.fastutil'
 }
-
-publish.mustRunAfter checkVersion
