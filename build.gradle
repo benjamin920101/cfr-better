@@ -1,43 +1,60 @@
 plugins {
     id 'java'
-    id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    id 'maven-publish'
+    id "dev.fastmc.maven-repo" version "1.0.0"
 }
 
-group = 'org.benf'
 version = '0.3-SNAPSHOT'
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
+
+group = 'net.fabricmc'
+archivesBaseName = 'cfr'
+
+sourceSets {
+    main {
+        java.srcDirs = ['src', 'src-templates']
+    }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    withSourcesJar()
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    // 將現成的 cfr binary 加入，並把 fastutil 加入依賴
-    implementation files('libs/cfr-0.3-SNAPSHOT.jar')
-    implementation 'it.unimi.dsi:fastutil:8.5.6'
+    modImplementation 'it.unimi.dsi:fastutil:8.5.11'
+    include name: 'it.unimi.dsi:fastutil:8.5.11'
 }
 
-application {
-    // Gradle 7+ 的寫法
-    mainClass = 'org.benf.cfr.reader.Main'
-}
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8'
-}
-
-shadowJar {
-    // 產出為 build/libs/cfr-with-fastutil-0.3-SNAPSHOT.jar
-    archiveBaseName.set('cfr-with-fastutil')
-    archiveVersion.set(version)
-    archiveClassifier.set('') // 取消 classifier，產生較簡潔檔名
+jar {
     manifest {
-        attributes('Main-Class': 'org.benf.cfr.reader.Main')
+        attributes 'Main-Class': 'org.benf.cfr.reader.Main'
     }
-    // 合併 service 檔與其他重複資源
-    mergeServiceFiles()
-    // 如有必要，可把 runtime classpath 的 jar 解開到最終 jar（通常 Shadow 已會處理）
-    // from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+}
+
+// A task to ensure that the version being released has not already been released.
+task checkVersion {
+    doFirst {
+        def xml = new URL("https://maven.fabricmc.net/net/fabricmc/cfr/maven-metadata.xml").text
+        def metadata = new XmlSlurper().parseText(xml)
+        def versions = metadata.versioning.versions.version*.text();
+        if (versions.contains(version)) {
+            throw new RuntimeException("${version} has already been released!")
+        }
+    }
+}
+
+publish.mustRunAfter checkVersion
